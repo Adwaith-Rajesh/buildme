@@ -31,6 +31,8 @@ It does come with some feature.
 
 ```console
 pip3 install git+https://github.com/Adwaith-Rajesh/buildme.git
+OR
+pip3 install buildme
 ```
 
 - Create a `buildme` script
