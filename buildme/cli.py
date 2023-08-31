@@ -33,7 +33,7 @@ def main() -> int:
     )
 
     # the dangerous part
-    exec(new_buildme_code)
+    exec(new_buildme_code, globals())
 
     return 0
 
