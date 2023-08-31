@@ -10,7 +10,7 @@ class CommandRunner:
         self.exit_non_zero = exit_non_zero
         self.print_cmd_sep = print_cmd_sep
 
-    def run(self, cmd: str) -> None:
+    def run(self, cmd: str) -> int:
         if self.print_cmd:
             print('=' * 80)
 
@@ -27,6 +27,8 @@ class CommandRunner:
             print(
                 f'Last command exited with non zero exit code. [{p.returncode}]')
             exit(1)
+
+        return p.returncode
 
     def set_exit_non_zero(self, val: bool) -> None:
         self.exit_non_zero = val

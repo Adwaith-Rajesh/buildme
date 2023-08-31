@@ -25,15 +25,18 @@ def main() -> int:
             user_arg_parser.add_argument(a.split('=')[0], type=str)
 
     usr_known_args, _ = user_arg_parser.parse_known_args()
+    usr_known_args_var_name = f'{usr_known_args=}'.split(
+        '=')[0]  # gets the var name as string
 
     new_buildme_code = _create_build_script_code(
         _get_buildme_file_contents(args.path),
         args.targets,
-        f'{usr_known_args=}'.split('=')[0]  # gets the var name as string
+        usr_known_args_var_name
     )
 
     # the dangerous part
-    exec(new_buildme_code, globals())
+    exec(new_buildme_code, {
+         usr_known_args_var_name: usr_known_args, **globals()})
 
     return 0
 
