@@ -1,5 +1,40 @@
+import argparse
+
+
+def _get_buildme_file_contents(filepath: str) -> str:
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+def _create_build_script_code(old_code: str, targets: list[str], usr_opt_var_name: str) -> str:
+    return old_code + ''.join(f'\n{t}({usr_opt_var_name})' for t in targets)
+
+
 def main() -> int:
-    print('Hello World')
+    parser = argparse.ArgumentParser()
+    user_arg_parser = argparse.ArgumentParser()
+
+    parser.add_argument('path', type=str, help='path to the buildme script')
+    parser.add_argument('targets', type=str, nargs='*',
+                        help='The list of targets to run')
+
+    args, unknown = parser.parse_known_args()
+
+    for a in unknown:
+        if a.startswith(('-', '--')):
+            user_arg_parser.add_argument(a.split('=')[0], type=str)
+
+    usr_known_args, _ = user_arg_parser.parse_known_args()
+
+    new_buildme_code = _create_build_script_code(
+        _get_buildme_file_contents(args.path),
+        args.targets,
+        f'{usr_known_args=}'.split('=')[0]  # gets the var name as string
+    )
+
+    # the dangerous part
+    exec(new_buildme_code)
+
     return 0
 
 
