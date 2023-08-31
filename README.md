@@ -45,8 +45,8 @@ from buildme import CommandRunner
 cr = CommandRunner(
     shell=False,  # prevents invoking 'mystery' programs (default=False)
     print_cmd=True,  # prints the command that is currently being executed (default=True)
-    print_cmd_sep=True,  # prints a separation line between the commands that are ran
-    exit_non_zero=True,  # exit the buildme execution if a command execute non zero
+    print_cmd_sep=True,  # prints a separation line between the commands that are ran (default=True)
+    exit_non_zero=True,  # exit the buildme execution if a command exits non zero (default=True)
 )
 
 # you can override the exit_no_zero using the
