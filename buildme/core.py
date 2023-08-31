@@ -28,5 +28,5 @@ class CommandRunner:
                 f'Last command exited with non zero exit code. [{p.returncode}]')
             exit(1)
 
-    def set_exit_no_zero(self, val: bool) -> None:
+    def set_exit_non_zero(self, val: bool) -> None:
         self.exit_non_zero = val
