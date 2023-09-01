@@ -40,7 +40,6 @@ class CommandRunner:
 
 class TargetData(NamedTuple):
     name: str
-    creates: list[str] = []
     depends: list[str] = []
 
 
@@ -50,9 +49,9 @@ WrapTargetFuncType = Callable[[Namespace], None]
 _targets = {}
 
 
-def target(creates: list[str], depends: list[str]) -> Callable[[TargetFuncType], WrapTargetFuncType]:
+def target(depends: list[str]) -> Callable[[TargetFuncType], WrapTargetFuncType]:
     def target_dec(fn: TargetFuncType) -> WrapTargetFuncType:
-        _targets[fn.__name__] = TargetData(name=fn.__name__, creates=creates, depends=depends)
+        _targets[fn.__name__] = TargetData(name=fn.__name__, depends=depends)
 
         @wraps(fn)
         def target_wrap(opts: Namespace) -> None:
