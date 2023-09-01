@@ -4,6 +4,7 @@ from itertools import compress
 from typing import Any
 
 from buildme.core import _check_target_exists
+from buildme.core import _exec_target
 
 
 def _get_buildme_file_contents(filepath: str) -> str:
@@ -37,16 +38,6 @@ def main() -> int:
     # gets the var name as string
     usr_known_args_var_name = f'{usr_known_args=}'.split('=')[0]  # noqa: F841
 
-    # new_buildme_code = _create_build_script_code(
-    #     _get_buildme_file_contents(args.path),
-    #     args.targets,
-    #     usr_known_args_var_name
-    # )
-
-    # the dangerous part
-    # exec(new_buildme_code, {
-    #      usr_known_args_var_name: usr_known_args, **globals()})
-
     target_globals: dict[str, Any] = {}
     exec(_get_buildme_file_contents(args.path), target_globals)
 
@@ -55,9 +46,9 @@ def main() -> int:
               file=sys.stderr)
         return 1
 
-    # hello(usr_known_args)
-    print(_get_buildme_file_contents('./buildme'))
-    print(target_globals['test'](None))
+    for t in args.targets:
+        _exec_target(t, usr_known_args, target_globals)
+
     return 0
 
 

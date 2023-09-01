@@ -1,7 +1,9 @@
 import shlex
+import sys
 from argparse import Namespace
 from functools import wraps
 from subprocess import Popen
+from typing import Any
 from typing import Callable
 from typing import NamedTuple
 
@@ -49,7 +51,7 @@ WrapTargetFuncType = Callable[[Namespace], None]
 _targets = {}
 
 
-def target(depends: list[str]) -> Callable[[TargetFuncType], WrapTargetFuncType]:
+def target(depends: list[str] = []) -> Callable[[TargetFuncType], WrapTargetFuncType]:
     def target_dec(fn: TargetFuncType) -> WrapTargetFuncType:
         _targets[fn.__name__] = TargetData(name=fn.__name__, depends=depends)
 
@@ -65,3 +67,16 @@ def _get_target_data(name: str) -> TargetData | None:
 
 
 def _check_target_exists(name: str) -> bool: return name in _targets
+
+
+def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> None:
+    if name not in _targets:
+        print(f'unknown target: {name}', file=sys.stderr)
+        exit(1)
+
+    if callable(fn := target_globals[name]):
+        t_data = _get_target_data(name)
+        if t_data:
+            for d in t_data.depends:
+                _exec_target(d, opts, target_globals)
+        fn(opts)
