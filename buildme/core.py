@@ -1,5 +1,9 @@
 import shlex
+from argparse import Namespace
+from functools import wraps
 from subprocess import Popen
+from typing import Callable
+from typing import NamedTuple
 
 
 class CommandRunner:
@@ -32,3 +36,33 @@ class CommandRunner:
 
     def set_exit_non_zero(self, val: bool) -> None:
         self.exit_non_zero = val
+
+
+class TargetData(NamedTuple):
+    name: str
+    creates: list[str] = []
+    depends: list[str] = []
+
+
+TargetFuncType = Callable[[Namespace, TargetData], None]
+WrapTargetFuncType = Callable[[Namespace], None]
+
+_targets = {}
+
+
+def target(creates: list[str], depends: list[str]) -> Callable[[TargetFuncType], WrapTargetFuncType]:
+    def target_dec(fn: TargetFuncType) -> WrapTargetFuncType:
+        _targets[fn.__name__] = TargetData(name=fn.__name__, creates=creates, depends=depends)
+
+        @wraps(fn)
+        def target_wrap(opts: Namespace) -> None:
+            fn(opts, _targets[fn.__name__])
+        return target_wrap
+    return target_dec
+
+
+def _get_target_data(name: str) -> TargetData | None:
+    return _targets.get(name, None)
+
+
+def _check_target_exists(name: str) -> bool: return name in _targets
