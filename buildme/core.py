@@ -17,7 +17,7 @@ class CommandRunner:
         self.print_cmd_sep = print_cmd_sep
 
     def run(self, cmd: str) -> int:
-        if self.print_cmd:
+        if self.print_cmd_sep:
             print('=' * 80)
 
         if self.print_cmd:
@@ -26,12 +26,11 @@ class CommandRunner:
         p = Popen(args=shlex.split(cmd), shell=self.shell)
         p.wait()
 
-        if self.print_cmd:
+        if self.print_cmd_sep:
             print('=' * 80)
 
         if self.exit_non_zero and p.returncode != 0:
-            print(
-                f'Last command exited with non zero exit code. [{p.returncode}]')
+            print(f'Last command exited with non zero exit code. [{p.returncode}]')
             exit(1)
 
         return p.returncode
