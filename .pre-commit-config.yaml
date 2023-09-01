@@ -18,6 +18,7 @@ repos:
     rev: v2.0.4
     hooks:
       - id: autopep8
+        args: ["--max-line-length", "120", "--in-place"]
   - repo: https://github.com/asottile/reorder_python_imports
     rev: v3.10.0
     hooks:
