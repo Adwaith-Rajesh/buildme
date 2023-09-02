@@ -41,7 +41,7 @@ pip3 install buildme
 ```python
 #!/bin/env buildme
 from argparse import Namespace  # for type hinting purposes only
-from buildme import CommandRunner
+from buildme import CommandRunner, target
 
 
 cr = CommandRunner(
@@ -55,16 +55,32 @@ cr = CommandRunner(
 # method CommandRunner.set_exit_non_zero(vel: bool)
 
 
-def hello(opts: Namespace):
+@target(depends=['test'])
+def hello(opts: Namespace, _):
     print(opts)
     code = cr.run('echo Hello World')
     print(f'{code=}')
 
 
-def test(opts: Namespace):
-    if opts.release == '0':
+@target()
+def test(opts: Namespace, _):
+    if getattr(opts, 'release', None) is not None and opts.release == '0':
         print('release is zero')
     print('This from test')
+
+
+@target()
+def foo(_, __):
+    print('This is the foo target')
+
+
+@target()
+def bar(_, __):
+    print('This is the bar target')
+
+
+@target(depends=['test'])
+def all(_, __): pass
 
 ```
 
@@ -78,6 +94,7 @@ chmod +x ./buildme
 
 ```console
 $ ./buildme hello
+This from test
 Namespace()
 ================================================================================
 [CMD]: echo Hello World
@@ -86,30 +103,17 @@ Hello World
 code=0
 ```
 
-```console
-$ ./buildme hello test --release=0
-Namespace(release='0')
-================================================================================
-[CMD]: echo Hello World
-Hello World
-================================================================================
-code=0
-release is zero
-This from test
-```
-
 > Order matters
 
 ```console
-$ ./buildme test hello --release=0
-release is zero
-This from test
-Namespace(release='0')
-================================================================================
-[CMD]: echo Hello World
-Hello World
-================================================================================
-code=0
+$ ./buildme foo bar
+This is the foo target
+This is the bar target
+
+$ ./buildme bar foo
+This is the bar target
+This is the foo target
+
 ```
 
 - Helper functions
@@ -117,7 +121,7 @@ code=0
 `buildme` has currently two helper functions
 
 ```python
-from buildme import mkdir, touch
+from buildme import mkdir, touch, rmdir, rm, get_files_in_dir
 ```
 
 # Bye....
