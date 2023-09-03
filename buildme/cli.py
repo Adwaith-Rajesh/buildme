@@ -12,10 +12,6 @@ def _get_buildme_file_contents(filepath: str) -> str:
         return f.read()
 
 
-def _create_build_script_code(old_code: str, targets: list[str], usr_opt_var_name: str) -> str:
-    return old_code + ''.join(f'\n{t}({usr_opt_var_name})' for t in targets)
-
-
 def _check_target_exists_map(targets: list[str]) -> list[bool]:
     return [_check_target_exists(name) for name in targets]
 
@@ -35,8 +31,6 @@ def main() -> int:
             user_arg_parser.add_argument(a.split('=')[0], type=str)
 
     usr_known_args, _ = user_arg_parser.parse_known_args()
-    # gets the var name as string
-    usr_known_args_var_name = f'{usr_known_args=}'.split('=')[0]  # noqa: F841
 
     target_globals: dict[str, Any] = {}
     exec(_get_buildme_file_contents(args.path), target_globals)
