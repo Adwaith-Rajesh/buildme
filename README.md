@@ -80,4 +80,19 @@ this is from bar target
 ================================================================================
 ```
 
+More docs can be found here: [Docs](/docs/buildme.md)
+
+- [Buildme](/docs/buildme.md#buildme-scripts)
+- [Target](/docs/buildme.md#target)
+  - [Creating a target](/docs/buildme.md#creating-a-target)
+  - [Target depending on another target](/docs/buildme.md#target-depending-on-another-target)
+  - [Target depending on files](/docs/buildme.md#target-depending-on-files)
+  - [Targets that creates files](/docs/buildme.md#targets-that-creates-files)
+- [CommandRunner](/docs/buildme.md#commandrunner)
+- [Receiving Command line args](/docs/buildme.md#receiving-command-line-args)
+- [Getting info about the target itself](/docs/buildme.md#getting-info-about-the-target-itself)
+- [Dynamic 'creates'](/docs/buildme.md#dynamic-creates)
+- [Combining Ideas](/docs/buildme.md#the-above-two-ides-can-combined-to-do-this)
+- [Helper functions](/docs/buildme.md#helper-functions)
+
 # Bye....
