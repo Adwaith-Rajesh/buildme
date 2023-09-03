@@ -74,9 +74,6 @@ def _parse_dependencies(depends: list[str]) -> TargetDepends:
         if d.startswith('f:'):
             fs.extend(glob.glob(d[2:]))
         else:
-            if d not in _targets:
-                print(f'unknown target: {d}')
-                exit(1)
             ts.append(d)
     return TargetDepends(targets=ts, files=fs)
 
@@ -164,6 +161,9 @@ def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> 
         t_data = _get_target_data(name)
         if t_data:
             for d in t_data.depends.targets:
+                if d not in _targets:
+                    print(f'unknown target: {d}', file=sys.stderr)
+                    exit(1)
                 if _decide_target_exec(d):
                     _exec_target(d, opts, target_globals)
         fn(opts)
