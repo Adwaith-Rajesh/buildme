@@ -85,7 +85,8 @@ def _parse_creates(creates: TargetCreateType) -> TargetCreates:
     if isinstance(creates, list):
         files = []
         for f in creates:
-            files.extend(glob.glob(f))
+            g = glob.glob(f)
+            files.extend(g if g else [f])  # the might exist in the future
         return TargetCreates(files=files, func=None)
 
 
