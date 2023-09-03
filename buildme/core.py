@@ -133,23 +133,19 @@ def _decide_target_exec(name: str) -> bool:
     if not t_data:
         return False
 
-    print('check 1')
     if not t_data.creates.files:
         return True
 
     n_creates = [Path(i) for i in t_data.creates.files]
     n_depends = [Path(i) for i in t_data.depends.files]
 
-    print('check 2')
     # check whether file exists
     if not all(i.exists() for i in n_creates):
         return True
 
-    print('check 3')
     if max(i.stat().st_mtime for i in n_creates) < min(i.stat().st_mtime for i in n_depends):
         return True
 
-    print('check 4')
     return False
 
 
