@@ -22,6 +22,7 @@ And,
 It does come with some feature.
 
 - It is just command runner (Does not give an _f_ about the file or it's mod time)
+  - v0.3.0 onwards, buildme does give an _f_ about the file and it's mod times (times have changed)
 - It's just python. Anything that works on python works on buildme script.
   - you want a build script that has access to `pandas`, well you can now have it.
 
@@ -40,34 +41,9 @@ pip3 install buildme
 
 ```python
 #!/bin/env buildme
-from argparse import Namespace  # for type hinting purposes only
 from buildme import CommandRunner, target
 
-
-cr = CommandRunner(
-    shell=False,  # prevents invoking 'mystery' programs (default=False)
-    print_cmd=True,  # prints the command that is currently being executed (default=True)
-    print_cmd_sep=True,  # prints a separation line between the commands that are ran (default=True)
-    exit_non_zero=True,  # exit the buildme execution if a command exits non zero (default=True)
-)
-
-# you can override the exit_no_zero using the
-# method CommandRunner.set_exit_non_zero(vel: bool)
-
-
-@target(depends=['test'])
-def hello(opts: Namespace, _):
-    print(opts)
-    code = cr.run('echo Hello World')
-    print(f'{code=}')
-
-
-@target()
-def test(opts: Namespace, _):
-    if getattr(opts, 'release', None) is not None and opts.release == '0':
-        print('release is zero')
-    print('This from test')
-
+cr = CommandRunner()
 
 @target()
 def foo(_, __):
@@ -76,10 +52,10 @@ def foo(_, __):
 
 @target()
 def bar(_, __):
-    print('This is the bar target')
+    cr.run('echo this is from bar target')
 
 
-@target(depends=['test'])
+@target(depends=['foo', 'bar'])
 def all(_, __): pass
 
 ```
@@ -87,41 +63,36 @@ def all(_, __): pass
 - Make it executable
 
 ```console
-chmod +x ./buildme
-```
-
-- Have Fun
-
-```console
-$ ./buildme hello
-This from test
-Namespace()
-================================================================================
-[CMD]: echo Hello World
-Hello World
-================================================================================
-code=0
-```
-
-> Order matters
-
-```console
-$ ./buildme foo bar
-This is the foo target
-This is the bar target
-
-$ ./buildme bar foo
-This is the bar target
+$ ./buildme foo
 This is the foo target
 
+$ ./buildme bar
+================================================================================
+[CMD]: echo this is from bar target
+this is from bar target
+================================================================================
+
+$ ./buildme all
+This is the foo target
+================================================================================
+[CMD]: echo this is from bar target
+this is from bar target
+================================================================================
 ```
 
-- Helper functions
+More docs can be found here: [Docs](/docs/buildme.md)
 
-`buildme` has currently two helper functions
-
-```python
-from buildme import mkdir, touch, rmdir, rm, get_files_in_dir
-```
+- [Buildme](/docs/buildme.md#buildme-scripts)
+- [Target](/docs/buildme.md#target)
+  - [Creating a target](/docs/buildme.md#creating-a-target)
+  - [Target depending on another target](/docs/buildme.md#target-depending-on-another-target)
+  - [Target depending on files](/docs/buildme.md#target-depending-on-files)
+  - [Targets that creates files](/docs/buildme.md#targets-that-creates-files)
+- [CommandRunner](/docs/buildme.md#commandrunner)
+- [Receiving Command line args](/docs/buildme.md#receiving-command-line-args)
+- [Getting info about the target itself](/docs/buildme.md#getting-info-about-the-target-itself)
+- [Dynamic 'creates'](/docs/buildme.md#dynamic-creates)
+- [Combining Ideas](/docs/buildme.md#the-above-two-ides-can-combined-to-do-this)
+- [Helper functions](/docs/buildme.md#helper-functions)
 
 # Bye....

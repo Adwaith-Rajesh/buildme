@@ -26,4 +26,9 @@ def get_files_in_dir(dir_pattern: str, recurse: bool = False,
     return glob.glob(dir_pattern, recursive=recurse, include_hidden=include_hidden)
 
 
+def get_file_name(path: str) -> str:
+    """gets file name from its path"""
+    return Path(path).name
+
+
 create_file = touch
