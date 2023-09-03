@@ -4,6 +4,7 @@ import sys
 from argparse import Namespace
 from dataclasses import dataclass
 from functools import wraps
+from pathlib import Path
 from subprocess import Popen
 from typing import Any
 from typing import Callable
@@ -104,7 +105,8 @@ def target(creates: TargetCreateType = [], depends: list[str] = []) -> Callable[
         if _targets[fn.__name__].creates.func is not None:
             # gen the file names that target might create
             _targets[fn.__name__].creates.files = _gen_create_files(
-                _targets[fn.__name__].creates.func, depends
+                func=_targets[fn.__name__].creates.func,
+                depends=_targets[fn.__name__].depends.files,
             )
 
         @wraps(fn)
@@ -122,14 +124,47 @@ def _get_target_data(name: str) -> TargetData | None:
 def _check_target_exists(name: str) -> bool: return name in _targets
 
 
+def _decide_target_exec(name: str) -> bool:
+    # target executes if:
+    # creates.files is empty
+    # if ones of the fils in create does not exists
+    # max mtimes (creates) < min mtimes (depends)
+    t_data = _get_target_data(name)
+    if not t_data:
+        return False
+
+    print('check 1')
+    if not t_data.creates.files:
+        return True
+
+    n_creates = [Path(i) for i in t_data.creates.files]
+    n_depends = [Path(i) for i in t_data.depends.files]
+
+    print('check 2')
+    # check whether file exists
+    if not all(i.exists() for i in n_creates):
+        return True
+
+    print('check 3')
+    if max(i.stat().st_mtime for i in n_creates) < min(i.stat().st_mtime for i in n_depends):
+        return True
+
+    print('check 4')
+    return False
+
+
 def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> None:
     if name not in _targets:
         print(f'unknown target: {name}', file=sys.stderr)
         exit(1)
 
+    if not _decide_target_exec(name):
+        return
+
     if callable(fn := target_globals[name]):
         t_data = _get_target_data(name)
         if t_data:
             for d in t_data.depends.targets:
-                _exec_target(d, opts, target_globals)
+                if _decide_target_exec(d):
+                    _exec_target(d, opts, target_globals)
         fn(opts)
