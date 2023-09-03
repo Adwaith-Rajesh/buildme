@@ -74,6 +74,9 @@ def _parse_dependencies(depends: list[str]) -> TargetDepends:
         if d.startswith('f:'):
             fs.extend(glob.glob(d[2:]))
         else:
+            if d not in _targets:
+                print(f'unknown target: {d}')
+                exit(1)
             ts.append(d)
     return TargetDepends(targets=ts, files=fs)
 
