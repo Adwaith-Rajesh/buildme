@@ -1,3 +1,4 @@
+import glob
 import shlex
 import sys
 from argparse import Namespace
@@ -39,9 +40,14 @@ class CommandRunner:
         self.exit_non_zero = val
 
 
+class TargetDepends(NamedTuple):
+    targets: list[str]
+    files: list[str]
+
+
 class TargetData(NamedTuple):
     name: str
-    depends: list[str] = []
+    depends: TargetDepends
 
 
 TargetFuncType = Callable[[Namespace, TargetData], None]
@@ -50,9 +56,20 @@ WrapTargetFuncType = Callable[[Namespace], None]
 _targets = {}
 
 
+def _parse_dependencies(depends: list[str]) -> TargetDepends:
+    ts = []
+    fs = []
+    for d in depends:
+        if d.startswith('f:'):
+            fs.extend(glob.glob(d[2:]))
+        else:
+            ts.append(d)
+    return TargetDepends(targets=ts, files=fs)
+
+
 def target(depends: list[str] = []) -> Callable[[TargetFuncType], WrapTargetFuncType]:
     def target_dec(fn: TargetFuncType) -> WrapTargetFuncType:
-        _targets[fn.__name__] = TargetData(name=fn.__name__, depends=depends)
+        _targets[fn.__name__] = TargetData(name=fn.__name__, depends=_parse_dependencies(depends))
 
         @wraps(fn)
         def target_wrap(opts: Namespace) -> None:
@@ -76,6 +93,6 @@ def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> 
     if callable(fn := target_globals[name]):
         t_data = _get_target_data(name)
         if t_data:
-            for d in t_data.depends:
+            for d in t_data.depends.targets:
                 _exec_target(d, opts, target_globals)
         fn(opts)
