@@ -134,7 +134,7 @@ def _decide_target_exec(name: str) -> bool:
     if not t_data:
         return False
 
-    if not t_data.creates.files:
+    if not t_data.creates.files or not t_data.depends.files:
         return True
 
     n_creates = [Path(i) for i in t_data.creates.files]
