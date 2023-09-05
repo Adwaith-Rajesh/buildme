@@ -42,18 +42,6 @@ class CommandRunner:
         self.exit_non_zero = val
 
 
-class CLIArgs:
-    def __init__(self, user_args: Namespace) -> None:
-        self._user_args: Namespace = user_args
-
-    def __getattr__(self, attr: str) -> str:
-        if getattr(self._user_args, attr, None) is None:
-            print(f"missing CLI option '--{attr}'")
-            exit(1)
-        else:
-            return getattr(self._user_args, attr)
-
-
 @dataclass
 class TargetDepends:
     targets: list[str]
@@ -73,14 +61,10 @@ class TargetData(NamedTuple):
 
 
 TargetCreateType = list[str] | Callable[[str], str]
-TargetFuncType = Callable[[CLIArgs, TargetData], None]
-WrapTargetFuncType = Callable[[CLIArgs], None]
+TargetFuncType = Callable[[Namespace, TargetData], None]
+WrapTargetFuncType = Callable[[Namespace], None]
 
 _targets: dict[str, TargetData] = {}
-
-
-def _wrap_user_args(args: Namespace) -> CLIArgs:
-    return CLIArgs(args)
 
 
 def _parse_dependencies(depends: list[str]) -> TargetDepends:
@@ -127,7 +111,7 @@ def target(creates: TargetCreateType = [], depends: list[str] = []) -> Callable[
             )
 
         @wraps(fn)
-        def target_wrap(opts: CLIArgs) -> None:
+        def target_wrap(opts: Namespace) -> None:
             fn(opts, _targets[fn.__name__])
 
         return target_wrap
@@ -183,4 +167,4 @@ def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> 
                     exit(1)
                 if _decide_target_exec(d):
                     _exec_target(d, opts, target_globals)
-            fn(_wrap_user_args(opts))
+        fn(opts)
