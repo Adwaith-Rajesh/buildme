@@ -22,8 +22,9 @@ A target is a python function that can be called from the CLI.
 A target will run when invoked if:
 
 - The target does not create any file (`@target(creates=[])`).
-- One of the files mentioned in `creates` does not exist
-- max mtimes (creates) < min mtimes (depends) (basically, if one of the files in `depends` updates)
+- The target does not depend on any files (`@target(depends=[])`).
+- One of the files mentioned in `creates` does not exist.
+- max mtimes (creates) < min mtimes (depends) (basically, if one of the files in `depends` updates).
   - kind of how makefile work.
 
 ---
