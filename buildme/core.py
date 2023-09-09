@@ -144,7 +144,7 @@ def _decide_target_exec(name: str) -> bool:
     if not all(i.exists() for i in n_creates):
         return True
 
-    if max(i.stat().st_mtime for i in n_creates) < min(i.stat().st_mtime for i in n_depends):
+    if max(i.stat().st_mtime for i in n_creates) < max(i.stat().st_mtime for i in n_depends):
         return True
 
     return False
@@ -155,9 +155,6 @@ def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> 
         print(f'unknown target: {name}', file=sys.stderr)
         exit(1)
 
-    if not _decide_target_exec(name):
-        return
-
     if callable(fn := target_globals[name]):
         t_data = _get_target_data(name)
         if t_data:
@@ -165,6 +162,8 @@ def _exec_target(name: str, opts: Namespace, target_globals: dict[str, Any]) -> 
                 if d not in _targets:
                     print(f'unknown target: {d}', file=sys.stderr)
                     exit(1)
-                if _decide_target_exec(d):
-                    _exec_target(d, opts, target_globals)
-        fn(opts)
+                # if _decide_target_exec(d):
+                _exec_target(d, opts, target_globals)
+
+        if _decide_target_exec(name):
+            fn(opts)
