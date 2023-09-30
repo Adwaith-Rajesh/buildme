@@ -1,6 +1,8 @@
 # helper funcs
 import glob
 import shutil
+import sys
+import warnings
 from pathlib import Path
 
 
@@ -23,7 +25,14 @@ def rm(path: str) -> None:
 
 def get_files_in_dir(dir_pattern: str, recurse: bool = False,
                      include_hidden: bool = False) -> list[str]:
-    return glob.glob(dir_pattern, recursive=recurse, include_hidden=include_hidden)
+    if sys.version_info.major == 3 and sys.version_info.minor > 10:
+        return glob.glob(dir_pattern, recursive=recurse, include_hidden=include_hidden)
+    if sys.version_info.major == 3 and sys.version_info.minor <= 10:
+        if recurse is True:
+            warnings.warn('recurs=True is not implemented for Python 3.10',
+                          UserWarning, stacklevel=2)
+        return glob.glob(dir_pattern, recursive=recurse)
+    return []
 
 
 def get_file_name(path: str) -> str:
